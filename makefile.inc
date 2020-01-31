@@ -127,11 +127,11 @@ else ifeq ($(shell uname -s),Linux)
    ifeq ($(optlevel),DEBUG)
       CFLAGS = -g -Wall -fPIC
       CXXFLAGS = -g -Wall -fPIC
-      FORTFLAGS = -g -Wall
+      FORTFLAGS = -g -Wall -fPIC
    else
       CFLAGS = -O -Wall -fPIC
       CXXFLAGS = -O -Wall -fPIC
-      FORTFLAGS = -O1 -Wall
+      FORTFLAGS = -O1 -Wall -fPIC
    endif
 ##
 # Add your machine name here
@@ -144,11 +144,11 @@ else
    ifeq ($(optlevel),DEBUG)
       CFLAGS = -g -Wall -fPIC
       CXXFLAGS = -g -Wall -fPIC
-      FORTFLAGS = -g -Wall
+      FORTFLAGS = -g -Wall -fPIC
    else
       CFLAGS = -O -Wall -fPIC
       CXXFLAGS = -O -Wall -fPIC
-      FORTFLAGS = -O1 -Wall
+      FORTFLAGS = -O1 -Wall -fPIC
    endif
 endif
 
