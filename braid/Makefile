@@ -44,7 +44,6 @@ BRAID_FILES =\
  adjoint.c\
  base.c\
  braid.c\
- braid_F90_iface.c\
  braid_status.c\
  braid_test.c\
  communication.c\
@@ -79,6 +78,8 @@ BRAID_OBJ = $(BRAID_FILES:.c=.o)
 .SUFFIXES:
 .SUFFIXES: .c .o
 
+all: libbraid.a libbraid.so
+
 # Rule for compiling .c files
 %.o: %.c $(BRAID_HEADERS)
 	$(MPICC) $(SEQFLAGS) $(CFLAGS) -c $< -o $@
@@ -88,8 +89,9 @@ libbraid.a: $(BRAID_HEADERS) $(BRAID_OBJ)
 	ar cruv libbraid.a $(BRAID_OBJ)
 	ranlib libbraid.a
 
-all: libbraid.a 
+libbraid.so: $(BRAID_HEADERS) $(BRAID_OBJ)
+	@echo "Building" $@ "..."
+	$(MPICC) -shared -o libbraid.so ${BRAID_OBJ}
 
 clean:
-	rm -f *.o libbraid.a
-
+	rm -f *.o libbraid.a libbraid.so
