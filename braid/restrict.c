@@ -91,6 +91,8 @@ _braid_FRestrict(braid_Core   core,
    _braid_CommHandle    *recv_handle  = NULL;
    _braid_CommHandle    *send_handle  = NULL;
 
+   braid_Real t1=0.0,t2=0.0,t3=0.0;
+
    braid_Int            c_level, c_ilower, c_iupper, c_index, c_i, c_ii;
    braid_BaseVector     c_u, *c_va, *c_fa;
 
@@ -130,7 +132,9 @@ _braid_FRestrict(braid_Core   core,
       }
 
       /* F-relaxation */
+      time_buffer = MPI_Wtime();
       _braid_GetRNorm(core, -1, &rnm);
+      t1 += MPI_Wtime()-t1;
       for (fi = flo; fi <= fhi; fi++)
       {
          time_buffer = MPI_Wtime();
@@ -157,6 +161,7 @@ _braid_FRestrict(braid_Core   core,
 
       }
 
+      time_buffer = MPI_Wtime();
       /* Allow user to process current C-point */
       if( (access_level>= 3) && (ci > -1) )
       {
@@ -173,8 +178,10 @@ _braid_FRestrict(braid_Core   core,
          _braid_UGetVectorRef(core, 0, ci, &u);
          _braid_AddToObjective(core, u, ostatus);
       }
+      t2 = MPI_Wtime()-time_buffer;
          
       
+      t3 = MPI_Wtime()-time_buffer;
       /* Compute residual and restrict */
       if (ci > _braid_CoreElt(core, initiali))
       {
@@ -208,6 +215,7 @@ _braid_FRestrict(braid_Core   core,
          _braid_UGetVectorRef(core, level, 0, &u);
          _braid_Coarsen(core, c_level, 0, 0, u, &c_va[0]);
       }
+      t3 = MPI_Wtime()-time_buffer;
 
       if ((flo <= fhi) || (ci > _braid_CoreElt(core, initiali)))
       {
@@ -280,7 +288,8 @@ _braid_FRestrict(braid_Core   core,
    all_time = MPI_Wtime() - all_time;
 
    {
-     printf("%d) ALL_TIME = %1.6e, STEP_TIME = %1.6e, TIME_CHECK = %1.6e\n",myid,all_time,step_time,time_check);
+     printf("%d) ALL_TIME = %1.6e, STEP_TIME = %1.6e, TIME_CHECK = %1.6e, %1.6e, %1.6e %1.6e\n",
+            myid,all_time,step_time,time_check,t1,t2,t3);
    }
   
    return _braid_error_flag;
