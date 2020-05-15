@@ -134,7 +134,7 @@ _braid_FRestrict(braid_Core   core,
       /* F-relaxation */
       time_buffer = MPI_Wtime();
       _braid_GetRNorm(core, -1, &rnm);
-      t1 += MPI_Wtime()-t1;
+      t1 += MPI_Wtime()-time_buffer;
       for (fi = flo; fi <= fhi; fi++)
       {
          time_buffer = MPI_Wtime();
@@ -181,7 +181,7 @@ _braid_FRestrict(braid_Core   core,
       t2 = MPI_Wtime()-time_buffer;
          
       
-      t3 = MPI_Wtime()-time_buffer;
+      time_buffer = MPI_Wtime();
       /* Compute residual and restrict */
       if (ci > _braid_CoreElt(core, initiali))
       {
