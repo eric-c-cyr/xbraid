@@ -91,7 +91,8 @@ _braid_FRestrict(braid_Core   core,
    _braid_CommHandle    *recv_handle  = NULL;
    _braid_CommHandle    *send_handle  = NULL;
 
-   braid_Real t1=0.0,t2=0.0,t3=0.0;
+   braid_Real t1=0.0,t2=0.0,t3=0.0, t4=0.0;
+   braid_Real t4_buf = 0.0;
 
    braid_Int            c_level, c_ilower, c_iupper, c_index, c_i, c_ii;
    braid_BaseVector     c_u, *c_va, *c_fa;
@@ -178,13 +179,14 @@ _braid_FRestrict(braid_Core   core,
          _braid_UGetVectorRef(core, 0, ci, &u);
          _braid_AddToObjective(core, u, ostatus);
       }
-      t2 = MPI_Wtime()-time_buffer;
+      t2 += MPI_Wtime()-time_buffer;
          
       
-      time_buffer = MPI_Wtime();
       /* Compute residual and restrict */
       if (ci > _braid_CoreElt(core, initiali))
       {
+         time_buffer = MPI_Wtime();
+
          /* Compute FAS residual */
          _braid_UGetVectorRef(core, level, ci, &u);
          _braid_FASResidual(core, level, ci, u, r);
@@ -208,14 +210,16 @@ _braid_FRestrict(braid_Core   core,
          _braid_MapFineToCoarse(ci, cfactor, c_index);
          _braid_Coarsen(core, c_level, ci, c_index, u, &c_va[c_index-c_ilower]);
          _braid_Coarsen(core, c_level, ci, c_index, r, &c_fa[c_index-c_ilower]);
+         t4 += MPI_Wtime()-time_buffer;
       }
       else if (ci == 0)
       {
+         time_buffer = MPI_Wtime();
          /* Restrict initial condition, coarsening in space if needed */
          _braid_UGetVectorRef(core, level, 0, &u);
          _braid_Coarsen(core, c_level, 0, 0, u, &c_va[0]);
+         t3 += MPI_Wtime()-time_buffer;
       }
-      t3 = MPI_Wtime()-time_buffer;
 
       if ((flo <= fhi) || (ci > _braid_CoreElt(core, initiali)))
       {
@@ -288,8 +292,8 @@ _braid_FRestrict(braid_Core   core,
    all_time = MPI_Wtime() - all_time;
 
    {
-     printf("%d) ALL_TIME = %1.6e, STEP_TIME = %1.6e, TIME_CHECK = %1.6e, %1.6e, %1.6e %1.6e\n",
-            myid,all_time,step_time,time_check,t1,t2,t3);
+     printf("%d) ALL_TIME = %1.6e, STEP_TIME = %1.6e, TIME_CHECK = %1.6e, %1.6e, %1.6e %1.6e, %1.6e\n",
+            myid,all_time,step_time,time_check,t1,t2,t3,t4);
    }
   
    return _braid_error_flag;
