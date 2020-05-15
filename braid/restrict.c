@@ -67,6 +67,11 @@ braid_Int
 _braid_FRestrict(braid_Core   core,
                  braid_Int    level)
 {
+   braid_Real           time_check = 0.0;
+   braid_Real           time_buffer = 0.0;
+   braid_Real           step_time = 0.0;
+   braid_Real           all_time = 0.0;
+   braid_Int            myid       = _braid_CoreElt(core, myid_world);
    MPI_Comm              comm         = _braid_CoreElt(core, comm);
    braid_App             app          = _braid_CoreElt(core, app);
    _braid_Grid         **grids        = _braid_CoreElt(core, grids);
@@ -101,6 +106,8 @@ _braid_FRestrict(braid_Core   core,
 
    rnorm = 0.0;
 
+   all_time = MPI_Wtime();
+
    _braid_UCommInit(core, level);
 
    /* Start from the right-most interval.
@@ -108,6 +115,7 @@ _braid_FRestrict(braid_Core   core,
     * Do an F-relax and then a C-relax.  These relaxations are needed to compute
     * the residual, which is needed for the coarse-grid right-hand-side and for
     * convergence checking on the finest grid.  This loop updates va and fa. */
+   time_check = MPI_Wtime();
    for (interval = ncpoints; interval > -1; interval--)
    {
       _braid_GetInterval(core, level, interval, &flo, &fhi, &ci);
@@ -125,7 +133,10 @@ _braid_FRestrict(braid_Core   core,
       _braid_GetRNorm(core, -1, &rnm);
       for (fi = flo; fi <= fhi; fi++)
       {
+         time_buffer = MPI_Wtime();
          _braid_Step(core, level, fi, NULL, r);
+         step_time += MPI_Wtime() - time_buffer;
+
          _braid_USetVector(core, level, fi, r, 0);
          
          /* Allow user to process current vector, note that r here is
@@ -203,6 +214,7 @@ _braid_FRestrict(braid_Core   core,
          _braid_BaseFree(core, app,  r);
       }
    }
+   time_check = MPI_Wtime()-time_check;
    _braid_UCommWait(core, level);
 
    /* If debug printing, print out tnorm_a for this interval. This
@@ -264,6 +276,12 @@ _braid_FRestrict(braid_Core   core,
       }
    }
    _braid_CommWait(core, &send_handle);
+
+   all_time = MPI_Wtime() - all_time;
+
+   {
+     printf("%d) ALL_TIME = %1.6e, STEP_TIME = %1.6e, TIME_CHECK = %1.6e\n",myid,all_time,step_time,time_check);
+   }
   
    return _braid_error_flag;
 }

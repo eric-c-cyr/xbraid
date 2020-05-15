@@ -55,6 +55,8 @@ braid_Drive(braid_Core  core)
    braid_Real    *ta;
    _braid_Grid   *grid;
    braid_Real     localtime, globaltime;
+   braid_Real     localtime_init;
+   braid_Real     localtime_inner;
 
    /* Check for non-supported adjoint features */
    if (adjoint)
@@ -88,6 +90,7 @@ braid_Drive(braid_Core  core)
    localtime = MPI_Wtime();
 
    /* Allocate and initialize grids */
+   localtime_init  = MPI_Wtime();
    if ( !warm_restart )
    {
       /* Create fine grid */
@@ -115,6 +118,7 @@ braid_Drive(braid_Core  core)
       /* Set initial values */
       _braid_InitGuess(core, 0);
    }
+   localtime_init  = MPI_Wtime()-localtime_init;
 
    /* Initialize sensitivity computation */
    if ( adjoint)
@@ -149,13 +153,18 @@ braid_Drive(braid_Core  core)
    _braid_CoreElt(core, warm_restart) = 1;
 
    /* Solve with MGRIT */
+   localtime_inner  = MPI_Wtime()-localtime_init;
    _braid_Drive(core, localtime);
+   localtime_inner  = MPI_Wtime()-localtime_inner;
 
    /* Stop timer */
    localtime = MPI_Wtime() - localtime;
    MPI_Allreduce(&localtime, &globaltime, 1, braid_MPI_REAL, MPI_MAX, comm_world);
    _braid_CoreElt(core, localtime)  = localtime;
    _braid_CoreElt(core, globaltime) = globaltime;
+
+
+   printf("%d) TIMES INT-INNER = %.6e, %.6e\n", myid, localtime_init,localtime_inner);
 
    /* Print statistics for this run */
    if ( (print_level > 1) && (myid == 0) )

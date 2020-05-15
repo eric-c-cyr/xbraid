@@ -430,6 +430,7 @@ braid_Int
 _braid_Drive(braid_Core  core, 
              braid_Real  localtime)
 {
+   braid_Int            myid       = _braid_CoreElt(core, myid_world);
    braid_Int            skip            = _braid_CoreElt(core, skip);
    braid_Int            max_levels      = _braid_CoreElt(core, max_levels);
    braid_Int            incr_max_levels = _braid_CoreElt(core, incr_max_levels);
@@ -444,6 +445,11 @@ _braid_Drive(braid_Core  core,
    braid_Int      nlevels;
    braid_Int      ilower, iupper;
    braid_Real     rnorm_adj;
+   braid_Real     localdown_RTime;
+   braid_Real     localdown_STime;
+   braid_Real     localup_RTime;
+   braid_Real     localup_STime;
+   braid_Real     timer_buffer;
 
    /* Cycle state variables */
    _braid_CycleState  cycle;
@@ -467,6 +473,11 @@ _braid_Drive(braid_Core  core,
       level = nlevels-1;
       _braid_CopyFineToCoarse(core);
    }
+
+   localdown_STime = 0.0;
+   localdown_RTime = 0.0;
+   localup_STime = 0.0;
+   localup_RTime = 0.0;
 
    iter = 0;
    _braid_CoreElt(core, niter) = iter;
@@ -495,11 +506,15 @@ _braid_Drive(braid_Core  core,
          /* Down cycle */
 
          /* CF-relaxation */
+         timer_buffer = MPI_Wtime();
          _braid_FCRelax(core, level);
+         localdown_STime += MPI_Wtime() - timer_buffer;
 
          /* F-relax then restrict (note that FRestrict computes a new rnorm) */
          /* if adjoint: This computes the local objective function at each step on finest grid. */
+         timer_buffer = MPI_Wtime();
          _braid_FRestrict(core, level);
+         localdown_RTime += MPI_Wtime() - timer_buffer;
 
          /* Compute full residual norm if requested */
          if ( (level == 0) &&  (fullres != NULL) )
@@ -529,12 +544,17 @@ _braid_Drive(braid_Core  core,
             }
 
             /* F-relax then interpolate */
+            timer_buffer = MPI_Wtime();
             _braid_FInterp(core, level);
+            localup_RTime += MPI_Wtime() - timer_buffer;
 
             level--;
          }
          else
          {
+            timer_buffer = MPI_Wtime();
+            localup_STime += MPI_Wtime() - timer_buffer;
+
             _braid_SyncStatusInit(iter, level, _braid_CoreElt(core, nrefine),
                                   _braid_CoreElt(core, gupper), done,
                                   braid_ASCaller_Drive_TopCycle, sstatus);
@@ -671,6 +691,8 @@ _braid_Drive(braid_Core  core,
 
    /* End cycle */
    _braid_DriveEndCycle(core, &cycle);
+
+   // printf("%d) _braid_Drive = %.6e, %.6e, %.6e, %.6e\n", myid, localdown_RTime,localdown_STime,localup_RTime,localup_STime);
 
    return _braid_error_flag;
 }
