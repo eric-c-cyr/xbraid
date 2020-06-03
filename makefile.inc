@@ -65,8 +65,8 @@ ifeq ($(findstring tux408,$(HOSTNAME)),tux408)
       CXXFLAGS = -g -Wall -Wno-reorder -lm -fPIC
       FORTFLAGS = -Og -Wall
    else
-      CFLAGS = -O -Wall -lm -fPIC
-      CXXFLAGS = -O -Wall -Wno-reorder -lm -fPIC
+      CFLAGS = -O2 -Wall -lm -fPIC
+      CXXFLAGS = -O2 -Wall -Wno-reorder -lm -fPIC
       FORTFLAGS = -O1 -Wall
    endif
    ifeq ($(lvalgrind),YES)
@@ -85,8 +85,8 @@ else ifeq ($(shell uname -s), Darwin)
       CXXFLAGS = -g -Wall -fPIC
       FORTFLAGS = -Og -Wall
    else
-      CFLAGS = -O -Wall -fPIC
-      CXXFLAGS = -O -Wall -fPIC
+      CFLAGS = -O2 -Wall -fPIC
+      CXXFLAGS = -O2 -Wall -fPIC
       FORTFLAGS = -O1 -Wall
    endif
 else ifeq ($(findstring cab,$(HOSTNAME)),cab)
@@ -100,8 +100,8 @@ else ifeq ($(findstring cab,$(HOSTNAME)),cab)
       CXXFLAGS = -g -Wall -fPIC
       FORTFLAGS = -Og -Wall
    else
-      CFLAGS = -O -Wall -fPIC
-      CXXFLAGS = -O -Wall -fPIC
+      CFLAGS = -O2 -Wall -fPIC
+      CXXFLAGS = -O2 -Wall -fPIC
       FORTFLAGS = -O1 -Wall
    endif   
 else ifeq ($(findstring vulcan,$(HOSTNAME)),vulcan)
@@ -115,8 +115,8 @@ else ifeq ($(findstring vulcan,$(HOSTNAME)),vulcan)
       CXXFLAGS = -g -Wall -fPIC
       FORTFLAGS = -Og -Wall
    else
-      CFLAGS = -O -Wall -fPIC
-      CXXFLAGS = -O -Wall -fPIC
+      CFLAGS = -O2 -Wall -fPIC
+      CXXFLAGS = -O2 -Wall -fPIC
       FORTFLAGS = -O1 -Wall
    endif
 else ifeq ($(shell uname -s),Linux)
@@ -129,9 +129,9 @@ else ifeq ($(shell uname -s),Linux)
       CXXFLAGS = -g -Wall -fPIC
       FORTFLAGS = -g -Wall -fPIC
    else
-      CFLAGS = -O -Wall -fPIC
-      CXXFLAGS = -O -Wall -fPIC
-      FORTFLAGS = -O1 -Wall -fPIC
+      CFLAGS = -O2 -Wall -fPIC
+      CXXFLAGS = -O2 -Wall -fPIC
+      FORTFLAGS = -O1 -Wall
    endif
 ##
 # Add your machine name here
@@ -146,9 +146,9 @@ else
       CXXFLAGS = -g -Wall -fPIC
       FORTFLAGS = -g -Wall -fPIC
    else
-      CFLAGS = -O -Wall -fPIC
-      CXXFLAGS = -O -Wall -fPIC
-      FORTFLAGS = -O1 -Wall -fPIC
+      CFLAGS = -O2 -Wall -fPIC
+      CXXFLAGS = -O2 -Wall -fPIC
+      FORTFLAGS = -O1 -Wall
    endif
 endif
 
@@ -163,8 +163,8 @@ ifeq ($(sequential),YES)
       CXXFLAGS = -g -Wall -D braid_SEQUENTIAL
       FORTFLAGS = -g -Wall -D braid_SEQUENTIAL
    else
-      CFLAGS = -O -Wall -D braid_SEQUENTIAL
-      CXXFLAGS = -O -Wall -D braid_SEQUENTIAL
+      CFLAGS = -O2 -Wall -D braid_SEQUENTIAL
+      CXXFLAGS = -O2 -Wall -D braid_SEQUENTIAL
       FORTFLAGS = -O1 -Wall -D braid_SEQUENTIAL
    endif
 endif

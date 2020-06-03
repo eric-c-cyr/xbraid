@@ -107,6 +107,8 @@ _braid_FRestrict(braid_Core   core,
    c_va     = _braid_GridElt(grids[c_level], va);
    c_fa     = _braid_GridElt(grids[c_level], fa);
 
+   printf("HERE NOW\n");
+
    rnorm = 0.0;
 
    all_time = MPI_Wtime();

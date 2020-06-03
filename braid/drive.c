@@ -455,6 +455,8 @@ _braid_Drive(braid_Core  core,
    _braid_CycleState  cycle;
    braid_Int          iter, level, done, refined;
 
+   printf("IN DRIVE!!!!!\n");
+
    /* Initialize cycle state */
    _braid_DriveInitCycle(core, &cycle);
 
